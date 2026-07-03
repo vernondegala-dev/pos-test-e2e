@@ -1,0 +1,43 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+*.egg
+dist/
+build/
+.venv/
+venv/
+env/
+
+# Testing
+reports/allure-results/
+reports/allure-report/
+reports/junit/
+reports/traces/
+reports/k6/
+screenshots/
+allure-history/
+.pytest_cache/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment
+.env
+.env.local
+*.log
+
+# Docker
+docker/postgres_data/
+
+# K6
+k6-summary.json
+k6-output.json
