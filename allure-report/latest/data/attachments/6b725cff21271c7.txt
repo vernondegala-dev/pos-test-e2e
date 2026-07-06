@@ -1,0 +1,97 @@
+INFO     src.core.browser_manager:browser_manager.py:41 Browser started: chromium (headless=True)
+INFO     src.pages.base_page:base_page.py:27 Navigated to: http://localhost:8069/web/login
+INFO     src.pages.pos.login_page:login_page.py:39 Login attempt with user: admin
+INFO     src.keywords.auth_keywords:auth_keywords.py:21 Admin login successful
+INFO     src.pages.base_page:base_page.py:27 Navigated to: http://localhost:8069/pos/ui?config_id=1
+INFO     src.pages.pos.pos_interface_page:pos_interface_page.py:43 POS UI did not load directly, starting session via config page
+INFO     src.pages.base_page:base_page.py:27 Navigated to: http://localhost:8069/web#action=396&model=pos.config&view_type=kanban&cids=1&menu_id=223
+INFO     src.pages.pos.pos_interface_page:pos_interface_page.py:53 Navigated to POS interface (config_id: 1)
+INFO     src.keywords.pos_keywords:pos_keywords.py:20 POS interface opened (config_id: 1)
+WARNING  src.core.self_healing.retry_handler:retry_handler.py:51 Attempt 1/3 failed for click: Locator.click: Timeout 30000ms exceeded.
+Call log:
+  - waiting for locator(".menu-button")
+    - locator resolved to <div class="navbar-button menu-button btn btn-light rounded-0 d-flex align-items-center px-3 cursor-pointer">…</div>
+  - attempting click action
+    2 × waiting for element to be visible, enabled and stable
+      - element is visible, enabled and stable
+      - scrolling into view if needed
+      - done scrolling
+      - <div role="dialog" class="modal-dialog position-absolute start-0 top-0 d-flex align-items-center justify-content-center h-100 w-100 mw-100 m-0 p-0 pe-auto bg-dark bg-opacity-50">…</div> from <div class="o-main-components-container">…</div> subtree intercepts pointer events
+    - retrying click action
+    - waiting 20ms
+    2 × waiting for element to be visible, enabled and stable
+      - element is visible, enabled and stable
+      - scrolling into view if needed
+      - done scrolling
+      - <div role="dialog" class="modal-dialog position-absolute start-0 top-0 d-flex align-items-center justify-content-center h-100 w-100 mw-100 m-0 p-0 pe-auto bg-dark bg-opacity-50">…</div> from <div class="o-main-components-container">…</div> subtree intercepts pointer events
+    - retrying click action
+      - waiting 100ms
+    58 × waiting for element to be visible, enabled and stable
+       - element is visible, enabled and stable
+       - scrolling into view if needed
+       - done scrolling
+       - <div role="dialog" class="modal-dialog position-absolute start-0 top-0 d-flex align-items-center justify-content-center h-100 w-100 mw-100 m-0 p-0 pe-auto bg-dark bg-opacity-50">…</div> from <div class="o-main-components-container">…</div> subtree intercepts pointer events
+     - retrying click action
+       - waiting 500ms
+. Retrying in 1.0s...
+INFO     src.core.self_healing.retry_handler:retry_handler.py:53 Detected modal overlay intercept, will wait for overlay to disappear before retry
+WARNING  src.core.self_healing.retry_handler:retry_handler.py:51 Attempt 2/3 failed for click: Locator.click: Timeout 30000ms exceeded.
+Call log:
+  - waiting for locator(".menu-button")
+    - locator resolved to <div class="navbar-button menu-button btn btn-light rounded-0 d-flex align-items-center px-3 cursor-pointer">…</div>
+  - attempting click action
+    2 × waiting for element to be visible, enabled and stable
+      - element is visible, enabled and stable
+      - scrolling into view if needed
+      - done scrolling
+      - <div role="dialog" class="modal-dialog position-absolute start-0 top-0 d-flex align-items-center justify-content-center h-100 w-100 mw-100 m-0 p-0 pe-auto bg-dark bg-opacity-50">…</div> from <div class="o-main-components-container">…</div> subtree intercepts pointer events
+    - retrying click action
+    - waiting 20ms
+    2 × waiting for element to be visible, enabled and stable
+      - element is visible, enabled and stable
+      - scrolling into view if needed
+      - done scrolling
+      - <div role="dialog" class="modal-dialog position-absolute start-0 top-0 d-flex align-items-center justify-content-center h-100 w-100 mw-100 m-0 p-0 pe-auto bg-dark bg-opacity-50">…</div> from <div class="o-main-components-container">…</div> subtree intercepts pointer events
+    - retrying click action
+      - waiting 100ms
+    58 × waiting for element to be visible, enabled and stable
+       - element is visible, enabled and stable
+       - scrolling into view if needed
+       - done scrolling
+       - <div role="dialog" class="modal-dialog position-absolute start-0 top-0 d-flex align-items-center justify-content-center h-100 w-100 mw-100 m-0 p-0 pe-auto bg-dark bg-opacity-50">…</div> from <div class="o-main-components-container">…</div> subtree intercepts pointer events
+     - retrying click action
+       - waiting 500ms
+. Retrying in 2.0s...
+INFO     src.core.self_healing.retry_handler:retry_handler.py:53 Detected modal overlay intercept, will wait for overlay to disappear before retry
+ERROR    src.core.self_healing.retry_handler:retry_handler.py:48 All 3 attempts failed for click: Locator.click: Timeout 30000ms exceeded.
+Call log:
+  - waiting for locator(".menu-button")
+    - locator resolved to <div class="navbar-button menu-button btn btn-light rounded-0 d-flex align-items-center px-3 cursor-pointer">…</div>
+  - attempting click action
+    2 × waiting for element to be visible, enabled and stable
+      - element is visible, enabled and stable
+      - scrolling into view if needed
+      - done scrolling
+      - <div role="dialog" class="modal-dialog position-absolute start-0 top-0 d-flex align-items-center justify-content-center h-100 w-100 mw-100 m-0 p-0 pe-auto bg-dark bg-opacity-50">…</div> from <div class="o-main-components-container">…</div> subtree intercepts pointer events
+    - retrying click action
+    - waiting 20ms
+    2 × waiting for element to be visible, enabled and stable
+      - element is visible, enabled and stable
+      - scrolling into view if needed
+      - done scrolling
+      - <div role="dialog" class="modal-dialog position-absolute start-0 top-0 d-flex align-items-center justify-content-center h-100 w-100 mw-100 m-0 p-0 pe-auto bg-dark bg-opacity-50">…</div> from <div class="o-main-components-container">…</div> subtree intercepts pointer events
+    - retrying click action
+      - waiting 100ms
+    58 × waiting for element to be visible, enabled and stable
+       - element is visible, enabled and stable
+       - scrolling into view if needed
+       - done scrolling
+       - <div role="dialog" class="modal-dialog position-absolute start-0 top-0 d-flex align-items-center justify-content-center h-100 w-100 mw-100 m-0 p-0 pe-auto bg-dark bg-opacity-50">…</div> from <div class="o-main-components-container">…</div> subtree intercepts pointer events
+     - retrying click action
+       - waiting 500ms
+
+WARNING  src.tests.conftest:conftest.py:144 POS session teardown failed: click failed after 3 attempts
+INFO     src.tests.conftest:conftest.py:132 Already logged out during teardown, skipping.
+INFO     src.core.browser_manager:browser_manager.py:59 Screenshot saved: screenshots/FAILED_test_1783366873.png
+WARNING  src.core.browser_manager:browser_manager.py:84 Failed to stop tracing: Tracing.stop: Must start tracing before stopping
+INFO     src.core.browser_manager:browser_manager.py:103 Browser closed.
