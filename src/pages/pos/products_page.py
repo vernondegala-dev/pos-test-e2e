@@ -45,12 +45,29 @@ class ProductsPage(BasePage):
             '.o_list_button_add',
             '.o-kanban-button-new',
             'button:has-text("New")',
+            'a:has-text("New")',
+            '.o_control_panel button:first-child',
         ]
+        clicked = False
         for sel in create_selectors:
-            if self.page.locator(sel).is_visible():
-                self.page.locator(sel).click()
-                break
-        self.wait_for_element(self.SELECTORS["form_view"])
+            try:
+                btn = self.page.locator(sel).first
+                if btn.is_visible():
+                    btn.click()
+                    clicked = True
+                    break
+            except Exception:
+                pass
+        if not clicked:
+            try:
+                btn = self.page.get_by_text("New", exact=True).first
+                if btn.is_visible():
+                    btn.click()
+                    clicked = True
+            except Exception:
+                pass
+        if clicked:
+            self.wait_for_element(self.SELECTORS["form_view"])
         return self
 
     @allure.step("Fill product form: {product_data}")
