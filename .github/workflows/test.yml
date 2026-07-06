@@ -236,6 +236,8 @@ jobs:
     runs-on: ubuntu-latest
     if: always()
     needs: [e2e-tests]
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v7
       - uses: actions/download-artifact@v8
@@ -276,7 +278,7 @@ jobs:
           "
       - name: Deploy Allure Report to Pages
         if: github.ref == 'refs/heads/main'
-        uses: peaceiris/actions-gh-pages@v3
+        uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: allure-history
