@@ -5,7 +5,7 @@ from src.pages.base_page import BasePage
 
 class ReturnsPage(BasePage):
     SELECTORS = {
-        "create_button": "button:has-text('Create')",
+        "create_button": 'button:has-text("New")',
         "customer_ref_input": 'input[name="partner_id"]',
         "order_ref_input": 'input[name="order_id"]',
         "product_select": 'select[name="product_id"]',

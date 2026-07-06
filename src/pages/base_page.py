@@ -131,3 +131,7 @@ class BasePage:
     def press_key(self, locator: str, key: str):
         self.page.locator(locator).press(key)
         return self
+
+    def wait_for_no_modal(self, timeout: int = 5_000):
+        wait_for_no_modal(self.page, timeout=timeout)
+        return self

@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 
 class CustomersPage(BasePage):
     SELECTORS = {
-        "create_button": "button:has-text('Create')",
+        "create_button": 'button:has-text("New")',
         "import_button": '.o_button_import',
         "search_input": '.o_searchview_input',
         "form_view": '.o_form_view',

@@ -13,7 +13,7 @@ class DashboardPage(BasePage):
 
     SELECTORS = {
         "apps_menu": '.o_navbar_apps_menu button',
-        "pos_app": 'a[data-menu-xmlid="point_of_sale.menu_point_root"]',
+        "pos_app": 'a[data-menu-xmlid="point_of_sale.menu_point_root"].o_app',
         "pos_dashboard": 'a[data-menu-xmlid="point_of_sale.menu_pos_dashboard"]',
         "pos_orders_menu": 'button[data-menu-xmlid="point_of_sale.menu_point_of_sale"]',
         "pos_orders": 'a[data-menu-xmlid="point_of_sale.menu_point_ofsale"]',
@@ -74,11 +74,10 @@ class DashboardPage(BasePage):
         return self
 
     def _click_submenu(self, parent_selector: str, child_selector: str):
-        parent = self.page.locator(parent_selector)
-        parent.click()
-        child = self.page.locator(child_selector)
-        child.wait_for(state="visible", timeout=10000)
-        child.click()
+        self.wait_for_no_modal()
+        self.click(parent_selector)
+        self.wait_for_element(child_selector, timeout=10000)
+        self.click(child_selector)
         self.wait_for_page_load()
         return self
 

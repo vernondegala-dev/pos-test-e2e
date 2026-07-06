@@ -5,7 +5,7 @@ from src.pages.base_page import BasePage
 
 class TaxPage(BasePage):
     SELECTORS = {
-        "create_button": "button:has-text('Create')",
+        "create_button": 'button:has-text("New")',
         "tax_name": 'input[name="name"]',
         "tax_amount": 'input[name="amount"]',
         "tax_type": 'select[name="amount_type"]',

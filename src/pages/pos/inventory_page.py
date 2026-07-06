@@ -5,7 +5,7 @@ from src.pages.base_page import BasePage
 
 class InventoryPage(BasePage):
     SELECTORS = {
-        "create_button": "button:has-text('Create')",
+        "create_button": 'button:has-text("New")',
         "search_input": ".o_searchview_input",
         "product_name": 'input[name="product_id"]',
         "quantity_input": 'input[name="inventory_quantity"]',

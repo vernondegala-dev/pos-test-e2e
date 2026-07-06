@@ -5,6 +5,7 @@ import allure
 from src.core.config import config
 from src.core.ui_utils import wait_for_no_modal
 from src.pages.base_page import BasePage
+from src.pages.pos.dashboard_page import DashboardPage
 
 logger = logging.getLogger(__name__)
 
@@ -32,9 +33,9 @@ class PosInterfacePage(BasePage):
         "category_item": ".category-item",
         "pos_branding": ".pos-branding",
         "popup": ".popup",
-        "opening_cash_control": ".popup.opening-cash-control",
-        "opening_cash_input": ".popup.opening-cash-control input[type='text']",
-        "open_session_button": '.popup.opening-cash-control button:has-text("Open session")',
+        "opening_cash_control": ".modal-dialog",
+        "opening_cash_input": ".modal-dialog input[type='text']",
+        "open_session_button": '.modal-dialog button:has-text("Open Session")',
     }
 
     def navigate_to(self, pos_id: int = 1):
@@ -43,28 +44,45 @@ class PosInterfacePage(BasePage):
             logger.info("POS UI did not load directly, starting session via config page")
             self.navigate(f"{config.base_url}/web#action=396&model=pos.config&view_type=kanban&cids=1&menu_id=223")
             self.wait_for_timeout(2000)
-            start_btn = self.page.locator('.o_kanban_record button:has-text("Session")')
-            if start_btn.is_visible():
+            session_btns = [
+                '.o_kanban_record button:has-text("Session")',
+                '.o_kanban_record a:has-text("Session")',
+                '.o_kanban_record button:has-text("Open Session")',
+                '.o_kanban_record a:has-text("Open Session")',
+                '.o_kanban_record button:has-text("New Session")',
+            ]
+            start_btn = None
+            for sel in session_btns:
+                if self.page.locator(sel).is_visible():
+                    start_btn = self.page.locator(sel)
+                    break
+            if start_btn:
                 with self.page.expect_navigation(wait_until='load', timeout=20000):
                     start_btn.click()
                 self.wait_for_element(self.SELECTORS["pos_container"], timeout=15000)
             else:
-                raise Exception("Could not find Session start button on config page")
+                raise Exception("Could not find Session/Open Session button on config page")
+        self.wait_for_timeout(2000)
+        self.start_session()
         logger.info(f"Navigated to POS interface (config_id: {pos_id})")
         return self
 
     @allure.step("Start POS session with opening cash: {opening_cash}")
     def start_session(self, opening_cash: str = "100"):
         try:
-            if self.is_visible(self.SELECTORS["opening_cash_control"]):
-                self.fill(self.SELECTORS["opening_cash_input"], opening_cash)
-                self.click(self.SELECTORS["open_session_button"])
+            try:
+                self.page.wait_for_selector(self.SELECTORS["opening_cash_control"], timeout=5_000)
+            except Exception:
+                pass
+            if self.page.locator(self.SELECTORS["opening_cash_control"]).is_visible():
+                self.page.locator(self.SELECTORS["opening_cash_input"]).fill(opening_cash)
+                self.page.locator(self.SELECTORS["open_session_button"]).click()
                 self.wait_for_element_disappear(self.SELECTORS["opening_cash_control"], timeout=15000)
                 logger.info(f"POS session started with opening cash: {opening_cash}")
             else:
                 logger.info("Session already started, skipping cash control")
-        except Exception:
-            logger.info("No cash control dialog, session already active")
+        except Exception as e:
+            logger.info(f"No cash control dialog, session already active: {e}")
         return self
 
     @allure.step("Search for product: {query}")

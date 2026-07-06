@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 
 class ProductsPage(BasePage):
     SELECTORS = {
-        "create_button": '.o_button_import',
+        "create_button": 'button:has-text("New")',
         "import_button": '.o_button_import',
         "search_input": '.o_searchview_input',
         "list_view": '.o_list_view',
@@ -39,7 +39,17 @@ class ProductsPage(BasePage):
 
     @allure.step("Click Create Product")
     def click_create(self):
-        self.click("button:has-text('Create')")
+        self.wait_for_no_modal()
+        create_selectors = [
+            self.SELECTORS["create_button"],
+            '.o_list_button_add',
+            '.o-kanban-button-new',
+            'button:has-text("New")',
+        ]
+        for sel in create_selectors:
+            if self.page.locator(sel).is_visible():
+                self.page.locator(sel).click()
+                break
         self.wait_for_element(self.SELECTORS["form_view"])
         return self
 
