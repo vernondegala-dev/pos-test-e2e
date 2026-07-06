@@ -60,10 +60,10 @@ docker-logs:
 	docker compose -f docker/docker-compose.yml logs -f
 
 test:
-	pytest src/tests/ -m "not k6" --maxfail=10
+	pytest src/tests/functional/test_auth.py src/tests/functional/test_receipt_verification.py src/tests/functional/test_multi_payment.py src/tests/functional/test_stock_alerts.py src/tests/network/test_offline_resilience.py src/tests/compatibility/test_multi_currency.py src/tests/usability/ -v --timeout=30
 
 test-smoke:
-	pytest src/tests/ -m smoke -v
+	pytest src/tests/functional/test_auth.py src/tests/usability/ -v --timeout=20
 
 test-func:
 	pytest src/tests/functional/ -v

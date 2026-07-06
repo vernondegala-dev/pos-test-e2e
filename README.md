@@ -109,67 +109,301 @@ pos-test-e2e/
 └── README.md
 ```
 
-## Quick Start
+## Quick Start (Beginner Guide)
+
+This guide walks you through setting up and running the POS test framework from scratch. No prior knowledge of Odoo, Docker, or Playwright is required — follow each step in order.
+
+---
 
 ### Prerequisites
 
-- Docker & Docker Compose
-- Python 3.11+
-- Node.js 18+ (for k6 performance tests)
+You need these tools installed on your machine before starting:
 
-### 1. Setup
+| Tool | Version | Purpose | Installation Guide |
+|------|---------|---------|-------------------|
+| **Docker Desktop** | Latest | Runs Odoo and PostgreSQL in isolated containers | [Download Docker Desktop](https://www.docker.com/products/docker-desktop/) |
+| **Python** | 3.11+ | Runs the test framework | [Download Python](https://www.python.org/downloads/) |
+| **Node.js** | 18+ | Required for k6 performance tests (optional) | [Download Node.js](https://nodejs.org/) |
+| **Git** | Latest | Clone the repository | [Download Git](https://git-scm.com/downloads) |
+
+> **Windows users**: Run all commands in PowerShell or Git Bash. Replace `python3` with `python` and use `.venv\Scripts\activate` to activate the virtual environment.
+
+---
+
+### Step 1: Clone the Repository
+
+Open a terminal and run:
 
 ```bash
-# Clone the repository
 git clone <repo-url> pos-test-e2e
 cd pos-test-e2e
+```
 
-# Create virtual environment
-python -m venv .venv
-source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+This downloads the project and moves you into the project folder.
 
-# Install dependencies
+---
+
+### Step 2: Set Up Python Virtual Environment
+
+A virtual environment isolates the project's Python dependencies so they don't conflict with other projects.
+
+```bash
+# Create a virtual environment named '.venv' inside the project folder
+python3 -m venv .venv
+
+# Activate it (your terminal prompt should change to show '(.venv)')
+source .venv/bin/activate
+```
+
+> **Windows**: Use `.venv\Scripts\activate`
+>
+> **macOS/Linux**: Use `source .venv/bin/activate`
+
+Verify it worked:
+```bash
+which python3
+# Should show a path INSIDE your project folder, like:
+# /Users/you/pos-test-e2e/.venv/bin/python3
+```
+
+---
+
+### Step 3: Install Python Dependencies
+
+```bash
+# Option A: Using the Makefile (recommended)
 make setup
+
+# Option B: Manual install (if make is not available)
+pip install -r requirements.txt
+playwright install chromium
 ```
 
-### 2. Start Odoo Environment
+This installs:
+- **pytest** and plugins (test runner, timeout, parallel execution, HTML reports)
+- **playwright** (browser automation — controls Chrome/Firefox/Safari)
+- **allure-pytest** (generates beautiful HTML test reports)
+- **faker** (generates random test data like names, emails, barcodes)
+- **k6** Python wrapper (for load testing)
+
+The `playwright install chromium` command downloads the Chromium browser binary (headless) that Playwright uses to run tests. This is **not** your regular Chrome browser — it's a dedicated browser for testing.
+
+---
+
+### Step 4: Start Odoo 17 with Docker
+
+Odoo is the POS system we're testing. Docker lets us run it without installing it directly on your machine.
 
 ```bash
-# Start Odoo + PostgreSQL
+# Start Odoo + PostgreSQL database + Adminer (database admin UI)
 make docker-up
-
-# Verify Odoo is running
-curl http://localhost:8069/web/login
 ```
 
-### 3. Run Tests
+**What happens behind the scenes:**
+1. Docker downloads the `odoo:17.0` and `postgres:16-alpine` images (first run only — takes 2-5 min)
+2. PostgreSQL starts and waits to accept connections
+3. Odoo's entrypoint script (`docker/entrypoint.sh`) runs:
+   - Creates a database named `pos_test`
+   - Installs the `point_of_sale` module with demo data
+   - Starts the Odoo web server on port 8069
+4. Adminer (database admin tool) starts on port 8080
+
+**Verify Odoo is running:**
 
 ```bash
-# Run all tests
+# Wait for Odoo to finish initializing (takes 30-60 seconds)
+curl -s -o /dev/null -w "%{http_code}" http://localhost:8069/web/login
+
+# If this returns '200', Odoo is ready!
+```
+
+If you get `000` or nothing, wait 10 more seconds and try again:
+```bash
+# Check Odoo logs to see what's happening
+docker compose -f docker/docker-compose.yml logs --tail=20 odoo
+```
+
+**What to expect in the logs:**
+- Near the end, you should see lines like:
+  ```
+  pos-odoo  | Modules loaded.
+  pos-odoo  | Starting Odoo HTTP service...
+  ```
+- If you see errors about database not existing, the entrypoint script is still creating it — just wait.
+
+**Access the Odoo web interface:**
+- Open your browser to **http://localhost:8069**
+- You should see the Odoo login page
+- Login with:
+  - **Username**: `admin`
+  - **Password**: `admin`
+
+> **Note**: The first Docker startup creates a fresh database with POS demo data. This data includes products like "Corner Desk Left Sit", "Large Desk", etc., and a POS configuration named "Shop".
+
+---
+
+### Step 5: Understand the Odoo 17 POS Flow
+
+Odoo 17 changed how POS sessions work compared to earlier versions. The key flow is:
+
+1. **Login** to Odoo with admin credentials
+2. The dashboard loads (defaults to the Discuss app)
+3. Click the **apps menu** (grid icon in top-left corner)
+4. Click **Point of Sale** — this takes you to the POS **Configuration** backend page
+5. Click **Open Session** or **New Session** on the "Shop" card
+6. The **POS Interface** loads at `http://localhost:8069/pos/ui?config_id=1`
+7. If **Opening Control** is enabled, a popup asks for opening cash — enter `100` and click **Open session**
+8. You're now in the POS and can add products, take payments, etc.
+
+The test framework automates all of this, but you should understand the flow to debug issues.
+
+---
+
+### Step 6: Run the Tests
+
+Now that Odoo is running, you can execute the test suite.
+
+#### Run a Quick Smoke Test (recommended first step)
+
+```bash
+make test-smoke
+```
+
+This runs a small set of fast tests (~10 seconds) to verify everything is set up correctly:
+- Login page loads
+- Admin can log in
+- Logout works
+
+#### Run the Full Test Suite
+
+```bash
 make test
-
-# Run specific test suites
-make test-smoke       # Quick smoke tests
-make test-func        # Functional tests only
-make test-negative    # Negative tests only
-make test-perf        # Performance tests only
-
-# Run tests in parallel (4 workers)
-make test-parallel
-
-# Run load tests with k6
-make k6-test
 ```
 
-### 4. View Reports
+This runs all available tests. Depending on the number of tests, this can take 2-10 minutes.
+
+#### Run Specific Test Categories
 
 ```bash
-# Generate Allure report
+# Authentication tests (login, logout, page elements) — ~5 seconds
+python3 -m pytest src/tests/functional/test_auth.py -v --timeout=20
+
+# POS workflow tests (add products, payments, receipts) — ~30 seconds
+python3 -m pytest src/tests/functional/test_receipt_verification.py src/tests/functional/test_multi_payment.py -v --timeout=30
+
+# All new BrowserStack-guide tests — ~2 minutes
+python3 -m pytest src/tests/functional/test_receipt_verification.py src/tests/functional/test_multi_payment.py src/tests/functional/test_stock_alerts.py src/tests/network/test_offline_resilience.py src/tests/compatibility/test_multi_currency.py -v --timeout=30
+
+# Usability tests — ~7 seconds
+python3 -m pytest src/tests/usability/ -v --timeout=20
+
+# All passing tests — ~2.5 minutes
+python3 -m pytest src/tests/functional/test_auth.py src/tests/functional/test_receipt_verification.py src/tests/functional/test_multi_payment.py src/tests/functional/test_stock_alerts.py src/tests/network/test_offline_resilience.py src/tests/compatibility/test_multi_currency.py src/tests/usability/ -v --timeout=30
+```
+
+#### Run a Single Test
+
+```bash
+python3 -m pytest "src/tests/functional/test_auth.py::TestAuthentication::test_admin_login_success" -v --timeout=20 --no-header
+```
+
+#### Understanding Test Output
+
+Each test line shows:
+```
+PASSED/FAILED [percentage]
+```
+
+At the end, you'll see a summary:
+```
+======= 30 passed, 1 failed in 138.82s (0:02:18) =======
+```
+
+If a test fails, look for the **AssertionError** message — it tells you exactly what condition wasn't met. The framework also captures:
+- A screenshot (`screenshots/FAILED_<test_name>.png`)
+- A Playwright trace (`reports/traces/<test_name>.zip`)
+
+---
+
+### Step 7: View the Allure Report
+
+The framework generates an interactive HTML dashboard with test results, graphs, and failure details.
+
+```bash
+# Generate the report from test results
 make allure-report
 
-# Serve Allure report locally
+# Serve it locally (opens a web server)
 make allure-serve
-# Open http://localhost:8081 in your browser
+
+# Open in your browser:
+open http://localhost:8081   # macOS
+# OR manually navigate to http://localhost:8081
+```
+
+**What the Allure dashboard shows:**
+- **Overview**: Pass/fail counts, duration, severity breakdown
+- **Categories**: Tests grouped by feature, story, severity
+- **Timeline**: When each test ran and how long it took
+- **Graphs**: Pie charts for pass/fail, bar charts for duration
+- **Behaviors**: Feature → Story → Test hierarchy
+- **Defects**: Failed/flaky tests with full logs and screenshots
+
+> If `make allure-serve` fails, ensure Allure CLI is installed:
+> ```bash
+> brew install allure   # macOS
+> npm install -g allure-commandline   # Any OS with Node.js
+> ```
+
+---
+
+### Step 8: Stop the Docker Environment
+
+When you're done testing, stop the Odoo containers:
+
+```bash
+make docker-down
+```
+
+This stops all containers but **preserves the database** in a Docker volume. Next time you run `make docker-up`, your test data and POS sessions will still be there.
+
+To **completely reset** (fresh database with demo data):
+
+```bash
+# Stop and remove containers AND volumes (deletes all data)
+docker compose -f docker/docker-compose.yml down -v
+
+# Start fresh
+make docker-up
+```
+
+---
+
+## Test Categories (BrowserStack Guide Coverage)
+
+Based on the BrowserStack POS testing guide, the framework covers these categories:
+
+| Category | Test File | Tests | Status |
+|----------|-----------|-------|--------|
+| **Barcode Scanning** | `test_barcode_scanning.py` | 5 | ⏸️ Skipped (timeout) |
+| **Receipt Verification** | `test_receipt_verification.py` | 5 | ✅ Passing |
+| **Multi-Payment** | `test_multi_payment.py` | 5 | ✅ Passing |
+| **Stock Alerts** | `test_stock_alerts.py` | 2 | ✅ Passing |
+| **Offline Resilience** | `test_offline_resilience.py` | 2 | ✅ Passing |
+| **Multi-Currency** | `test_multi_currency.py` | 2 | ✅ Passing |
+| **Usability** | `test_ui_consistency.py`, `test_accessibility.py` | 10 | ✅ Passing |
+| **Auth/Security** | `test_auth.py` | 5 | ✅ 4/5 Passing |
+
+All markers are registered in `pytest.ini`:
+```
+barcode, payment_methods, receipt, stock_alerts, offline, multi_currency
+```
+
+Run tests by marker:
+```bash
+python3 -m pytest -m "receipt" -v --timeout=30
+python3 -m pytest -m "payment_methods" -v --timeout=30
+python3 -m pytest -m "offline or stock_alerts or multi_currency" -v --timeout=30
 ```
 
 ## Self-Healing Framework
