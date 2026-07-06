@@ -243,12 +243,37 @@ jobs:
           name: allure-results
           path: reports/allure-results/
         continue-on-error: true
-      - name: Generate Allure Report
-        uses: simple-elf/allure-report-action@v1.9
+      - name: Setup Java
+        uses: actions/setup-java@v4
         with:
-          allure_results: reports/allure-results
-          allure_history: allure-history
-          keep_reports: 20
+          distribution: temurin
+          java-version: 17
+      - name: Install Allure CLI
+        run: |
+          curl -sL https://github.com/allure-framework/allure2/releases/download/2.33.0/allure-2.33.0.tgz | tar xz -C /tmp
+          sudo mv /tmp/allure-2.33.0 /opt/allure
+          sudo ln -sf /opt/allure/bin/allure /usr/local/bin/allure
+          allure --version
+      - name: Generate Allure Report
+        run: |
+          mkdir -p allure-history
+          allure generate reports/allure-results -o allure-history/${{ github.run_number }} --clean
+          # Keep latest link
+          rm -f allure-history/latest
+          ln -sf ${{ github.run_number }} allure-history/latest
+      - name: Build report index
+        run: |
+          python3 -c "
+          import os, json
+          reports = sorted([d for d in os.listdir('allure-history') if d.isdigit()], key=int)
+          html = '<html><head><title>Allure Reports</title></head><body><h1>Allure Reports</h1><ul>'
+          for r in reversed(reports):
+              html += f'<li><a href=\"{r}/index.html\">Run #{r}</a></li>'
+          html += '</ul></body></html>'
+          with open('allure-history/index.html','w') as f:
+              f.write(html)
+          print(f'Index built for {len(reports)} reports')
+          "
       - name: Deploy Allure Report to Pages
         if: github.ref == 'refs/heads/main'
         uses: peaceiris/actions-gh-pages@v3
@@ -256,6 +281,7 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: allure-history
           destination_dir: allure-report
+          keep_files: true
 
   notify:
     name: Notify Results
