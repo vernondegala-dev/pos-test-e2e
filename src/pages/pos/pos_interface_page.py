@@ -3,6 +3,7 @@ import logging
 import allure
 
 from src.core.config import config
+from src.core.ui_utils import wait_for_no_modal
 from src.pages.base_page import BasePage
 
 logger = logging.getLogger(__name__)
@@ -84,12 +85,14 @@ class PosInterfacePage(BasePage):
     @allure.step("Select product: {product_name}")
     def select_product(self, product_name: str):
         locator = f'article.product:has-text("{product_name}")'
+        wait_for_no_modal(self.page)
         self.page.locator(locator).first.click()
         logger.info(f"Selected product: {product_name}")
         return self
 
     @allure.step("Select first product from results")
     def select_first_product(self):
+        wait_for_no_modal(self.page)
         self.page.locator(self.SELECTORS["product_item"]).first.click()
         logger.info("Selected first product")
         return self
@@ -265,6 +268,7 @@ class PosInterfacePage(BasePage):
         self.wait_for_timeout(1000)
         confirm = self.page.query_selector('.popup.popup-confirm')
         if confirm and confirm.is_visible():
+            wait_for_no_modal(self.page)
             confirm.query_selector('.button.confirm').click()
             self.wait_for_timeout(2000)
         logger.info("POS session closed")

@@ -60,6 +60,9 @@ class BrowserManager:
         return path
 
     def start_tracing(self):
+        if not self._context:
+            logger.warning("Cannot start tracing: no context")
+            return
         trace_dir = Path("reports/traces")
         trace_dir.mkdir(parents=True, exist_ok=True)
         self._context.tracing.start(
@@ -69,10 +72,17 @@ class BrowserManager:
         )
 
     def stop_tracing(self, name: str = "trace"):
+        if not self._context:
+            logger.warning("Cannot stop tracing: no context")
+            return ""
         trace_dir = Path("reports/traces")
         trace_dir.mkdir(parents=True, exist_ok=True)
         path = str(trace_dir / f"{name}.zip")
-        self._context.tracing.stop(path=path)
+        try:
+            self._context.tracing.stop(path=path)
+        except Exception as e:
+            logger.warning(f"Failed to stop tracing: {e}")
+            return ""
         return path
 
     def close(self):

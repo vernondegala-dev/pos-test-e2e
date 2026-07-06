@@ -2,11 +2,18 @@ import asyncio
 import logging
 import time
 from functools import wraps
-from typing import Callable, Optional, Type, Union
+from typing import Callable, Optional
 
 from src.core.config import config
 
 logger = logging.getLogger(__name__)
+
+MODAL_INTERCEPT_MARKERS = [
+    "subtree intercepts",
+    "intercepts pointer events",
+    "TimeoutError",
+    "waiting for element to be visible",
+]
 
 
 class RetryExhaustedError(Exception):
@@ -24,6 +31,10 @@ def retry_on_failure(
     base_delay = base_delay or config.retry_base_delay
     max_delay = max_delay or config.retry_max_delay
 
+    def _is_modal_intercept(e: Exception) -> bool:
+        msg = str(e).lower()
+        return any(marker.lower() in msg for marker in MODAL_INTERCEPT_MARKERS)
+
     def decorator(func: Callable):
         @wraps(func)
         def wrapper(*args, **kwargs):
@@ -38,6 +49,8 @@ def retry_on_failure(
                         raise RetryExhaustedError(f"{func.__name__} failed after {max_attempts} attempts") from e
                     delay = min(base_delay * (2 ** (attempt - 1)), max_delay)
                     logger.warning(f"Attempt {attempt}/{max_attempts} failed for {func.__name__}: {e}. Retrying in {delay:.1f}s...")
+                    if _is_modal_intercept(e):
+                        logger.info("Detected modal overlay intercept, will wait for overlay to disappear before retry")
                     if on_retry:
                         on_retry(attempt, e)
                     time.sleep(delay)

@@ -45,7 +45,8 @@ def setup_teardown(request, browser_manager: BrowserManager):
 
             if config.trace_on_failure:
                 trace_path = browser_manager.stop_tracing(test_name)
-                allure.attach.file(trace_path, name="failure_trace", attachment_type=allure.attachment_type.ZIP)
+                if trace_path:
+                    allure.attach.file(trace_path, name="failure_trace", attachment_type=allure.attachment_type.ZIP)
     except Exception as e:
         logger.warning(f"Failed to capture failure artifacts: {e}")
 

@@ -6,6 +6,7 @@ from playwright.sync_api import Locator, Page
 from src.core.config import config
 from src.core.self_healing.locator_manager import HealerLocator, LocatorManager
 from src.core.self_healing.retry_handler import RetryHandler, retry_on_failure
+from src.core.ui_utils import wait_for_no_modal
 
 logger = logging.getLogger(__name__)
 
@@ -31,6 +32,7 @@ class BasePage:
 
     @retry_on_failure()
     def click(self, locator: str, *, by_role: bool = False, **kwargs):
+        wait_for_no_modal(self.page, timeout=5_000)
         if by_role:
             role = kwargs.pop("role", "button")
             name = kwargs.pop("name", locator)
@@ -39,8 +41,13 @@ class BasePage:
             self.page.locator(locator).click(**kwargs)
         return self
 
+    def force_click(self, locator: str, *, by_role: bool = False, **kwargs):
+        kwargs.setdefault("force", True)
+        return self.click(locator, by_role=by_role, **kwargs)
+
     @retry_on_failure()
     def fill(self, locator: str, value: str, **kwargs):
+        wait_for_no_modal(self.page, timeout=3_000)
         self.page.locator(locator).fill(value, **kwargs)
         return self
 
