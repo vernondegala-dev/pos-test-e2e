@@ -100,14 +100,18 @@ jobs:
             -e USER=odoo \
             -e PASSWORD=odoo17 \
             -e DB_NAME=pos_test \
-            -e DATABASE_URL=postgresql://odoo:odoo17@localhost:5432/pos_test \
+            -e ADMIN_PASSWORD=admin \
+            -e POS_DEMO=true \
+            -v "$(pwd)/docker/entrypoint.sh:/entrypoint-custom.sh" \
             -p 8069:8069 \
-            odoo:17.0
-          echo "Waiting for Odoo to be ready..."
-          timeout=180
-          until curl -s http://localhost:8069/web/login > /dev/null 2>&1; do
-            sleep 5
-            timeout=$((timeout - 5))
+            --entrypoint /bin/bash \
+            odoo:17.0 \
+            /entrypoint-custom.sh
+          echo "Waiting for Odoo to be ready (DB init + server start)..."
+          timeout=300
+          until curl -s http://localhost:8069/web/login | grep -q "web/login"; do
+            sleep 10
+            timeout=$((timeout - 10))
             if [ $timeout -le 0 ]; then
               echo "Odoo failed to start"
               docker logs odoo

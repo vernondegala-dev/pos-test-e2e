@@ -1,25 +1,43 @@
 #!/bin/bash
 set -e
 
+DB_HOST="${HOST:-db}"
+DB_USER="${USER:-odoo}"
+DB_PASSWORD="${PASSWORD:-odoo17}"
+DB_NAME="${DB_NAME:-pos_test}"
 DB_PORT="${DB_PORT:-5432}"
+POS_DEMO="${POS_DEMO:-false}"
 
-# Check if the database is properly initialized by looking for the ir_module_module table
-TABLE_EXISTS=$(PGPASSWORD=odoo17 psql -h db -U odoo -d pos_test -t -c "SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_name='ir_module_module');" 2>/dev/null || echo "f")
+INIT_MODULES="base,web,point_of_sale"
+if [ "$POS_DEMO" = "true" ]; then
+  INIT_MODULES="${INIT_MODULES},pos_demo"
+fi
 
-if [ "$TABLE_EXISTS" != "t" ]; then
+# Check if psql is available and DB is initialized (skip check if psql not found)
+NEED_INIT=true
+if command -v psql &>/dev/null; then
+  TABLE_EXISTS=$(PGPASSWORD="$DB_PASSWORD" psql -h "$DB_HOST" -U "$DB_USER" -d "$DB_NAME" -t -c "SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_name='ir_module_module');" 2>/dev/null || echo "f")
+  if [ "$TABLE_EXISTS" = "t" ]; then
+    NEED_INIT=false
+  fi
+else
+  echo "psql not found; skipping DB check, will run init unconditionally."
+fi
+
+if [ "$NEED_INIT" = "true" ]; then
   echo "Initializing Odoo database with Point of Sale module..."
 
   /usr/bin/odoo \
-    --db_host=db \
-    --db_user=odoo \
-    --db_password=odoo17 \
-    --database=pos_test \
+    --db_host="$DB_HOST" \
+    --db_user="$DB_USER" \
+    --db_password="$DB_PASSWORD" \
+    --database="$DB_NAME" \
     --db_port="$DB_PORT" \
-    --init=base,web,point_of_sale \
+    --init="$INIT_MODULES" \
     --stop-after-init \
     --no-http \
     --log-level=info \
-    --addons-path=/usr/lib/python3/dist-packages/odoo/addons 2>&1
+    2>&1
 
   INIT_EXIT_CODE=$?
   if [ $INIT_EXIT_CODE -ne 0 ]; then
@@ -34,13 +52,13 @@ fi
 
 echo "Starting Odoo server..."
 exec /usr/bin/odoo \
-  --db_host=db \
-  --db_user=odoo \
-  --db_password=odoo17 \
-  --database=pos_test \
+  --db_host="$DB_HOST" \
+  --db_user="$DB_USER" \
+  --db_password="$DB_PASSWORD" \
+  --database="$DB_NAME" \
   --db_port="$DB_PORT" \
   --http-port=8069 \
   --log-level=info \
   --workers=4 \
   --max-cron-threads=2 \
-  --addons-path=/usr/lib/python3/dist-packages/odoo/addons
+  
