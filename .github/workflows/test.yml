@@ -95,21 +95,22 @@ jobs:
       - name: Start Odoo
         run: |
           docker run -d --name odoo \
+            --network host \
             -e HOST=localhost \
             -e USER=odoo \
             -e PASSWORD=odoo17 \
             -e DB_NAME=pos_test \
+            -e DATABASE_URL=postgresql://odoo:odoo17@localhost:5432/pos_test \
             -p 8069:8069 \
-            -v ${{ github.workspace }}/docker/entrypoint.sh:/entrypoint-custom.sh \
-            --entrypoint /bin/bash \
-            odoo:17.0 /entrypoint-custom.sh
+            odoo:17.0
           echo "Waiting for Odoo to be ready..."
-          timeout=120
+          timeout=180
           until curl -s http://localhost:8069/web/login > /dev/null 2>&1; do
             sleep 5
             timeout=$((timeout - 5))
             if [ $timeout -le 0 ]; then
               echo "Odoo failed to start"
+              docker logs odoo
               exit 1
             fi
           done
