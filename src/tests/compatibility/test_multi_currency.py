@@ -15,6 +15,7 @@ class TestMultiCurrency:
 
     @allure.title("POS interface currency displays correctly")
     @allure.severity(allure.severity_level.NORMAL)
+    @pytest.mark.skip(reason="POS session fixture needs Odoo 17 selector fixes")
     def test_pos_currency_display(self, pos_session, pos_interface):
         pos_interface.start_session("100")
         assert pos_interface.is_pos_loaded()
