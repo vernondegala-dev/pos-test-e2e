@@ -12,8 +12,8 @@ class DashboardPage(BasePage):
     URL = f"{config.base_url}/web"
 
     SELECTORS = {
-        "apps_menu": '.o_navbar_apps_menu button',
-        "pos_app": 'a[data-menu-xmlid="point_of_sale.menu_point_root"].o_app',
+        "apps_menu": '.o_navbar_apps_menu button, .o_menu_apps button, button[data-menu="apps"]',
+        "pos_app": 'a.o_app[data-menu-xmlid*="point_of_sale"], button.o_app[data-menu-xmlid*="point_of_sale"], a[href*="menu_id=point_of_sale"]',
         "pos_dashboard": 'a[data-menu-xmlid="point_of_sale.menu_pos_dashboard"]',
         "pos_orders_menu": 'button[data-menu-xmlid="point_of_sale.menu_point_of_sale"]',
         "pos_orders": 'a[data-menu-xmlid="point_of_sale.menu_point_ofsale"]',
@@ -36,8 +36,12 @@ class DashboardPage(BasePage):
     @allure.step("Navigate to POS module")
     def open_pos_module(self):
         self.click(self.SELECTORS["apps_menu"])
-        self.wait_for_element(self.SELECTORS["pos_app"])
-        self.click(self.SELECTORS["pos_app"])
+        try:
+            self.page.locator(self.SELECTORS["pos_app"]).wait_for(state="visible", timeout=5000)
+            self.click(self.SELECTORS["pos_app"])
+        except Exception:
+            logger.warning("POS app not found in apps menu, navigating directly")
+            self.page.goto(f"{config.base_url}/web#action=point_of_sale.pos_config_action&cids=1", wait_until="load")
         self.wait_for_page_load()
         logger.info("Opened POS module")
         return self

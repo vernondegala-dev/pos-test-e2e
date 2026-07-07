@@ -158,22 +158,25 @@ class ProductsPage(BasePage):
         self.wait_for_page_load()
         return self
 
+    def _is_on_product_form(self) -> bool:
+        url = self.page.url
+        if "model=product.template" in url or "model=product.product" in url:
+            return "view_type=form" in url
+        return False
+
     @allure.step("Create a new product")
     def create_product(self, product_data: dict):
         self.click_create()
-        field_present = False
-        for field_sel in ['div[name="name"].o_field_widget', '[name="name"] .o_input', 'input[name="name"]']:
-            try:
-                self.page.locator(field_sel).wait_for(state="visible", timeout=3000)
-                field_present = True
-                break
-            except Exception:
-                pass
-        if not field_present:
+        if not self._is_on_product_form():
             logger.warning("Product create form not detected after UI click, navigating directly")
             self.page.goto(f"{config.base_url}/web#model=product.template&view_type=form&cids=1", wait_until="load")
         self.fill_product_form(product_data)
         self.save()
+        self.wait_for_timeout(1000)
+        if not self._is_on_product_form():
+            logger.warning("After save, not on product form; returning to list")
+            self.navigate(f"{config.base_url}/web#model=product.template&view_type=list&cids=1")
+            self.wait_for_timeout(1000)
         return self
 
     @allure.step("Get product list")

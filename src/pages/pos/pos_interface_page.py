@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 class PosInterfacePage(BasePage):
     SELECTORS = {
-        "pos_container": ".o_pos, .pos, .pos-ui, .pos-container, .pos-receipt, .pos-sale",
+        "pos_container": ".o_pos_ui, .o_pos, .pos, .pos-ui, .pos-container, .pos-receipt, .pos-sale",
         "product_list": ".product-list",
         "product_item": "article.product",
         "product_name": ".product-name",
