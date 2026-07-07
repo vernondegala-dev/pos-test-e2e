@@ -1,0 +1,33 @@
+INFO     src.core.browser_manager:browser_manager.py:41 Browser started: chromium (headless=True)
+INFO     src.pages.base_page:base_page.py:34 Navigated to: http://localhost:8069/web/login
+INFO     src.pages.pos.login_page:login_page.py:39 Login attempt with user: admin
+INFO     src.keywords.auth_keywords:auth_keywords.py:21 Admin login successful
+INFO     src.pages.base_page:base_page.py:34 Navigated to: http://localhost:8069/pos/ui?config_id=1
+INFO     src.pages.pos.pos_interface_page:pos_interface_page.py:48 POS UI did not load directly, starting session via dashboard
+WARNING  src.pages.base_page:base_page.py:30 Navigation aborted to http://localhost:8069, retrying with domcontentloaded
+INFO     src.pages.base_page:base_page.py:34 Navigated to: http://localhost:8069
+INFO     src.pages.pos.dashboard_page:dashboard_page.py:46 Opened POS module
+WARNING  src.core.self_healing.retry_handler:retry_handler.py:51 Attempt 1/3 failed for wait_for_element: Locator.wait_for: Error: strict mode violation: locator(".o_pos_ui, .o_pos, .pos, .pos-ui, .pos-container, .pos-receipt, .pos-sale") resolved to 2 elements:
+    1) <body class="pos">…</body> aka locator("body")
+    2) <div class="pos dvh-100 d-flex flex-column">…</div> aka get_by_text("Mitchell AdminStart adding")
+
+Call log:
+  - waiting for locator(".o_pos_ui, .o_pos, .pos, .pos-ui, .pos-container, .pos-receipt, .pos-sale") to be visible
+    5 × locator resolved to hidden <body class="pos">…</body>
+. Retrying in 1.0s...
+WARNING  src.core.self_healing.retry_handler:retry_handler.py:51 Attempt 2/3 failed for wait_for_element: Locator.wait_for: Error: strict mode violation: locator(".o_pos_ui, .o_pos, .pos, .pos-ui, .pos-container, .pos-receipt, .pos-sale") resolved to 2 elements:
+    1) <body class="pos">…</body> aka locator("body")
+    2) <div class="pos dvh-100 d-flex flex-column">…</div> aka get_by_text("Mitchell AdminStart adding")
+
+Call log:
+  - waiting for locator(".o_pos_ui, .o_pos, .pos, .pos-ui, .pos-container, .pos-receipt, .pos-sale") to be visible
+. Retrying in 2.0s...
+ERROR    src.core.self_healing.retry_handler:retry_handler.py:48 All 3 attempts failed for wait_for_element: Locator.wait_for: Error: strict mode violation: locator(".o_pos_ui, .o_pos, .pos, .pos-ui, .pos-container, .pos-receipt, .pos-sale") resolved to 2 elements:
+    1) <body class="pos">…</body> aka locator("body")
+    2) <div class="pos dvh-100 d-flex flex-column">…</div> aka get_by_text("Mitchell AdminStart adding")
+
+Call log:
+  - waiting for locator(".o_pos_ui, .o_pos, .pos, .pos-ui, .pos-container, .pos-receipt, .pos-sale") to be visible
+INFO     src.tests.conftest:conftest.py:132 Already logged out during teardown, skipping.
+WARNING  src.core.fixtures:fixtures.py:51 Failed to capture failure artifacts: 'Function' object has no attribute 'rep_call'
+INFO     src.core.browser_manager:browser_manager.py:103 Browser closed.
