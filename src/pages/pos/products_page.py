@@ -2,6 +2,7 @@ import logging
 
 import allure
 
+from src.core.config import config
 from src.pages.base_page import BasePage
 
 logger = logging.getLogger(__name__)
