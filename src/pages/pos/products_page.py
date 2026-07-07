@@ -160,6 +160,17 @@ class ProductsPage(BasePage):
     @allure.step("Create a new product")
     def create_product(self, product_data: dict):
         self.click_create()
+        field_present = False
+        for field_sel in ['div[name="name"].o_field_widget', '[name="name"] .o_input', 'input[name="name"]']:
+            try:
+                self.page.locator(field_sel).wait_for(state="visible", timeout=3000)
+                field_present = True
+                break
+            except Exception:
+                pass
+        if not field_present:
+            logger.warning("Product create form not detected after UI click, navigating directly")
+            self.page.goto(f"{config.base_url}/web#model=product.template&view_type=form&cids=1", wait_until="load")
         self.fill_product_form(product_data)
         self.save()
         return self

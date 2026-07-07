@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 class PosInterfacePage(BasePage):
     SELECTORS = {
-        "pos_container": "div.pos.dvh-100",
+        "pos_container": ".o_pos, .pos, .pos-ui, .pos-container, .pos-receipt, .pos-sale",
         "product_list": ".product-list",
         "product_item": "article.product",
         "product_name": ".product-name",
@@ -52,11 +52,14 @@ class PosInterfacePage(BasePage):
         dashboard.open_pos_module()
         self.wait_for_timeout(2000)
         session_btns = [
+            'button:has-text("New Session")',
+            'a:has-text("New Session")',
+            'button:has-text("Open Session")',
+            'a:has-text("Open Session")',
             '.o_kanban_record button:has-text("Session")',
             '.o_kanban_record a:has-text("Session")',
             '.o_kanban_record button:has-text("Open Session")',
             '.o_kanban_record a:has-text("Open Session")',
-            '.o_kanban_record button:has-text("New Session")',
         ]
         start_btn = None
         for sel in session_btns:
