@@ -216,6 +216,8 @@ jobs:
     needs: [e2e-tests]
     steps:
       - uses: actions/checkout@v7
+      - name: Create reports directory
+        run: mkdir -p reports/k6
       - name: Run k6 load test
         uses: grafana/k6-action@v0.3.1
         with:
